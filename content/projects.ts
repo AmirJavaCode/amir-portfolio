@@ -1,20 +1,32 @@
+import { figures } from "./figures";
+
 export type Collection = "lab" | "hardware";
 export type Status =
   | "Completed involvement"
   | "Completed coursework"
   | "Coursework"
   | "In development";
+export type ProjectImage = {
+  kind: "image";
+  src: string;
+  fullSrc?: string;
+  label?: string;
+  alt: string;
+  caption: string;
+  width: number;
+  height: number;
+};
 export type Asset =
-  | {
-      kind: "image";
-      src: string;
-      alt: string;
-      caption: string;
-      width: number;
-      height: number;
-    }
+  | ProjectImage
   | { kind: "document"; src: string; title: string; description: string };
 export type Step = { title: string; text: string };
+export type EvidenceItem = Step & {
+  metrics?: [string, string][];
+  note?: string;
+  figures?: ProjectImage[];
+  paired?: boolean;
+  workflow?: Step[];
+};
 export type Project = {
   slug: string;
   collection: Collection;
@@ -38,10 +50,11 @@ export type Project = {
   steps: Step[];
   currentStep?: number;
   evidenceTitle: string;
-  evidence: Step[];
+  evidence: EvidenceItem[];
   limitations: string;
   takeaway: string;
-  cover?: Extract<Asset, { kind: "image" }>;
+  cover?: ProjectImage;
+  thumbnail?: ProjectImage;
   assets: Asset[];
 };
 
@@ -59,7 +72,9 @@ export const projects: Project[] = [
     tags: ["Photolithography", "AZ1518", "Spin coating"],
     context: "UCSD NanoEngineering & Technology Society (NETS)",
     date: "October 2025 – June 2026",
-    role: "Process Fabrication Engineer",
+    role: "Process Engineer",
+    cover: figures.poster,
+    thumbnail: figures.chronoThumb,
     illustration: "/art/chrono-lithos.svg",
     illustrationAlt:
       "Exploded schematic of a patterned photomask above a resist-coated substrate.",
@@ -106,7 +121,7 @@ export const projects: Project[] = [
     evidence: [
       {
         title: "Team poster",
-        text: "The project poster documents the equipment, CAD models, mask designs and sample patterns. These are team artifacts from the benchtop platform.",
+        text: "The design panel pairs a CAD enclosure with photographs of the assembled UV exposure box. The application panel shows mask layouts and patterned samples from the NETS team. The poster identifies process optimization and optical characterization as future work.",
       },
       {
         title: "Scope of involvement",
@@ -130,7 +145,9 @@ export const projects: Project[] = [
     status: "Completed coursework",
     tags: ["Graphene transfer", "PbS quantum dots", "I–V analysis"],
     context: "UCSD NANO 4 laboratory coursework",
-    date: "Fall 2025",
+    date: "September–December 2025",
+    cover: figures.after,
+    thumbnail: figures.afterThumb,
     role: "Student, device fabrication laboratory",
     illustration: "/art/graphene-photodetector.svg",
     illustrationAlt:
@@ -142,8 +159,8 @@ export const projects: Project[] = [
     background:
       "Graphene provides a conducting path between contacts. PbS quantum dots absorb light and can change the carrier population in the adjacent graphene through charge transfer and photogating. Measuring current as voltage changes provides a way to compare device conditions.",
     contributions: [
-      "In NANO 4, I worked through PMMA-assisted graphene transfer, surface inspection and electrical measurements.",
-      "I used measurements at different contact separations to examine resistance, resistivity and conductivity and compared the response before and after sensitization.",
+      "I fabricated graphene–PbS devices using PMMA-assisted transfer, inspected the same region before and after cleaning, and spin coated the quantum-dot layer.",
+      "I checked the VirtualBench setup with a known resistor and a multimeter. I then used I–V slopes and device geometry to calculate resistance, resistivity and conductivity, and compared the hybrid device under dark and illuminated conditions.",
     ],
     methodTitle: "From copper foil to device measurement",
     methodDiagram: "device-stack",
@@ -166,25 +183,54 @@ export const projects: Project[] = [
       },
       {
         title: "Compare illumination",
-        text: "Dark and illuminated I–V behavior was compared for bare graphene and the sensitized device.",
+        text: "A separate illumination source allowed current to be compared in the dark and under illumination. The bare-graphene and hybrid device measurements used a fixed bias of 500 mV.",
       },
     ],
-    evidenceTitle: "Dark and illuminated measurements",
+    evidenceTitle: "Microscopy & measured results",
     evidence: [
       {
-        title: "Bare graphene",
-        text: "The unsensitized channel provided the reference for comparing dark and illuminated electrical behavior.",
+        title: "Graphene transfer and cleaning",
+        text: "We inspected the marked device region twice. The first view records the surface with the PMMA support in place. The second inspection shows the graphene and gold contacts after solvent cleaning.",
+        figures: [figures.before, figures.after],
+        paired: true,
       },
       {
-        title: "Graphene with PbS",
-        text: "The course report describes a stronger illuminated electrical response after PbS quantum-dot sensitization. This observation is qualitative.",
+        title: "Device before sensitization",
+        text: "The contact pads allow measurements across different lengths of the graphene channel. This photograph records the device before the quantum-dot layer was added.",
+        figures: [figures.chip],
+      },
+      {
+        title: "Electrical characterization",
+        text: "For each contact pair, we swept the voltage from −500 to +500 mV in 100 mV steps. The slope gives conductance. Figure 4 shows the 500 µm pair.",
+        figures: [figures.iv],
+      },
+      {
+        title: "Hybrid device under illumination",
+        text: "At fixed bias, illumination increased the current through the graphene–PbS device. The course report describes a smaller light response for bare graphene.",
+        metrics: [
+          ["Contact separations investigated", "100, 200 & 500 µm"],
+          ["Photodetection bias", "500 mV"],
+          ["Illuminated current", "≈0.60 mA"],
+          ["Dark current", "≈0.50 mA"],
+          ["Increase over dark current", "≈20%"],
+        ],
+        note: "The currents are approximate readings from Figure 5 of Amir’s NANO 4 report. The relative change uses the dark reading as its baseline, (0.60 − 0.50) / 0.50 ≈ 20%.",
+        figures: [figures.lightDark],
       },
     ],
     limitations:
       "Contact resistance, transfer residue and spatial variation in the quantum-dot film can complicate comparisons. A quantitative responsivity estimate would also require calibrated incident optical power and controlled illumination.",
     takeaway:
       "Pairing surface inspection with electrical measurements helps distinguish a material-level explanation from a change in contact quality or processing history.",
-    assets: [],
+    assets: [
+      {
+        kind: "document",
+        src: "/assets/graphene-photodetector/nano-4-lab-report.pdf",
+        title: "Read the NANO 4 laboratory report (PDF)",
+        description:
+          "Amir Kania’s course report includes the original five figures, measurement conditions and discussion.",
+      },
+    ],
   },
   {
     slug: "nano20l",
@@ -193,12 +239,14 @@ export const projects: Project[] = [
     fullTitle: "Nanomaterials Synthesis & Characterization",
     category: "Surface chemistry & nanoscale materials",
     summary:
-      "Course experiments in surface functionalization, metallic nanoparticles and semiconducting nanowires.",
+      "Measuring silver colloids by dynamic light scattering and tracing an oleic acid monolayer at the air–water interface, alongside coursework on gold nanoparticles and nanowires.",
     status: "Coursework",
     tags: ["SAMs", "Nanoparticles", "Nanowires"],
     context: "UCSD NANO 20L laboratory coursework",
     date: "2026",
     role: "Student, nanomaterials laboratory",
+    cover: figures.silver,
+    thumbnail: figures.silverThumb,
     illustration: "/art/nano20l.svg",
     illustrationAlt:
       "Conceptual illustration of a cluster of faceted nanoparticles.",
@@ -209,13 +257,14 @@ export const projects: Project[] = [
     background:
       "Changing the surface chemistry of a substrate can alter how it interacts with liquids and molecules. In nanoscale growth, the balance between nucleation and subsequent growth helps determine the structures that form.",
     contributions: [
-      "My NANO 20L laboratory work included self-assembled monolayers, synthesis of gold and silver nanoparticles, and semiconducting nanowires.",
+      "I synthesized silver nanoparticles by reducing silver ions in solution with polyvinylpyrrolidone (PVP) as the capping agent. I used centrifugation and solvent exchange to prepare material for optical and DLS characterization.",
+      "I formed an oleic acid monolayer at an air–water interface and used an annotated overhead image to relate its visible boundary to a physical area.",
     ],
     methodTitle: "Experiments",
     steps: [
       {
-        title: "Surface functionalization / SAMs",
-        text: "Molecules with a suitable surface-binding group can assemble into a monolayer. Their exposed terminal groups influence surface properties such as wettability.",
+        title: "Oleic acid self-assembled monolayers",
+        text: "Oleic acid spreads across the air–water interface, with the polar head groups interacting with water and the hydrocarbon tails oriented toward air. An oil film and lycopodium powder made the spreading boundary visible.",
       },
       {
         title: "Gold nanoparticles",
@@ -223,28 +272,77 @@ export const projects: Project[] = [
       },
       {
         title: "Silver nanoparticles",
-        text: "Silver nanoparticle synthesis provides another system for examining nucleation and growth. The optical response can depend on shape, size and aggregation.",
+        text: "In the modified Turkevich synthesis used in NANO 20L, silver ions were reduced in the presence of PVP. UV–Vis spectroscopy probed the optical response associated with localized surface plasmon resonance. DLS measured the dispersion, and dark-field microscopy showed scattering in a drop-cast deposit.",
       },
       {
         title: "Semiconducting nanowires",
         text: "Preferential growth along one direction produces elongated semiconductor structures. Microscope images can be used to examine morphology and growth variation.",
       },
     ],
-    evidenceTitle: "Reading characterization data",
+    evidenceTitle: "Experimental observations",
     evidence: [
       {
-        title: "Optical spectroscopy",
-        text: "A UV–Vis spectrum measures wavelength-dependent absorbance. For metallic nanoparticles, its shape and peak position can help interpret changes in the dispersion.",
+        title: "Dark-field inspection of silver nanoparticles",
+        text: "After solvent exchange, a drop of the silver dispersion was deposited for microscopy. Bright scattering features vary across the field. They show the distribution of optically scattering material. Individual particle diameters cannot be read from this view.",
+        figures: [figures.silver],
       },
       {
-        title: "Sizing and morphology",
-        text: "DLS probes hydrodynamic size in suspension. Microscopy addresses a different question by showing the morphology of the imaged sample.",
+        title: "Silver colloid · DLS size record",
+        text: "For the ethanol-exchanged Ag sample, the Zetasizer reported a cumulants Z-average and a separate number-weighted distribution. These describe different aspects of the dispersion.",
+        metrics: [
+          ["Z-average hydrodynamic diameter", "115.3 nm"],
+          ["Number-weighted peak", "79.30 nm"],
+          ["Distribution standard deviation", "21.14 nm"],
+          ["Polydispersity index", "0.259"],
+          ["Measurement temperature", "25.0 °C"],
+          ["Instrument-reported quality", "Good"],
+        ],
+        note: "Transcribed from the size record for “Ag NP (ethanol) 1” in Figure 2. The standard deviation belongs to the number-weighted peak.",
+        figures: [figures.dlsSize],
+      },
+      {
+        title: "Silver colloid · DLS signal monitoring",
+        text: "The monitor plots photon count rate against time. Its separate distribution summary includes a larger-size population. Aggregation or another source of large scattering species could contribute to that signal.",
+        metrics: [
+          ["Photon count rate", "205.4 kcps"],
+          ["Z-average hydrodynamic diameter", "110.4 nm"],
+          ["Polydispersity index", "0.321"],
+        ],
+        note: "Transcribed from the acquisition screen in Figure 3. Its relationship to the Figure 2 acquisition is undocumented, so each set of readings is reported separately.",
+        figures: [figures.dlsSignal],
+      },
+      {
+        title: "Oleic acid monolayer · image analysis",
+        text: "A known quantity of oleic acid spread into a thin film at the air–water interface. The displaced powder and oil outlined its footprint, allowing the photograph to connect a macroscopic measurement to molecular dimensions.",
+        figures: [figures.monolayer],
+        workflow: [
+          {
+            title: "Molecular self-assembly",
+            text: "The amphiphilic molecules spread over water as the carrier solvent evaporated.",
+          },
+          {
+            title: "Visualize the boundary",
+            text: "Trace the displaced oil and lycopodium powder. The yellow outline marks the estimated film perimeter.",
+          },
+          {
+            title: "Calibrate the image",
+            text: "Divide the annotated 14 cm watch-glass diameter by its length in pixels to obtain centimetres per pixel.",
+          },
+          {
+            title: "Calculate surface area",
+            text: "Multiply the number of enclosed pixels by the square of the calibration factor to obtain film area in cm².",
+          },
+          {
+            title: "Estimate molecular dimensions",
+            text: "Divide the deposited oleic acid volume by the film area to estimate monolayer thickness. With a molecular packing model, this can inform an estimate of Avogadro’s number.",
+          },
+        ],
       },
     ],
     limitations:
-      "Sample-specific spectra, size distributions and microscopy are needed to discuss outcomes from an individual synthesis. The experiment descriptions give the scientific purpose of each exercise.",
+      "DLS measures hydrodynamic size in suspension and is sensitive to large scatterers. The dark-field deposit samples a different physical state. In the monolayer analysis, uncertainty in the boundary, camera angle, delivered volume and single-layer assumption affects any estimate of molecular dimensions.",
     takeaway:
-      "Each characterization method answers a different question. Interpreting a sample requires matching the observation to the property the method actually measures.",
+      "A size estimate depends on what the instrument measures. Keeping the DLS weighting, sample state and image calibration with each observation makes the results interpretable.",
     assets: [],
   },
   {
@@ -259,6 +357,7 @@ export const projects: Project[] = [
     tags: ["CAD", "Systems integration", "Prototyping"],
     context: "Student-led aerospace systems initiative",
     role: "Process & Hardware Systems Engineer",
+    date: "July 2025 – present",
     illustration: "/art/pyraasypis-uav.svg",
     illustrationAlt:
       "Concept block diagram connecting the proposed sensors, airframe, water delivery and pilot display.",
@@ -320,4 +419,4 @@ export const projects: Project[] = [
 
 export const projectPath = (project: Project) =>
   `/${project.collection}/${project.slug}/`;
-export const ferrari: { media: Asset[] } = { media: [] };
+export const ferrari: { media: Asset[] } = { media: [figures.mesh] };

@@ -8,7 +8,7 @@ export const profile = {
   graduation: "June 2029",
   location: "San Diego, California",
   // Set this only after reviewing the public PDF and removing any private contact details.
-  resumePdf: null as string | null,
+  resumePdf: "/assets/resume/amir-kania.pdf" as string | null,
 };
 
 export const skills = [
@@ -20,7 +20,7 @@ export const skills = [
   {
     name: "Materials & characterization",
     items:
-      "Optical microscopy, electrical I–V measurements, resistance and conductivity analysis, experimental data interpretation.",
+      "Optical and dark-field microscopy, dynamic light scattering, UV–Vis spectroscopy, electrical I–V measurements, resistance and conductivity analysis.",
   },
   {
     name: "Mechanical design & hardware",

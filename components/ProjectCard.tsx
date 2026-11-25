@@ -12,12 +12,13 @@ export function ProjectStatus({ status }: { status: Status }) {
   );
 }
 export function ProjectCard({ project: p }: { project: Project }) {
+  const photo = p.thumbnail ?? p.cover;
   return (
     <article className="project-card" data-collection={p.collection}>
       <div className="card-media">
         <Image
-          src={p.cover?.src || p.illustration}
-          alt={p.cover?.alt || p.illustrationAlt}
+          src={photo?.src || p.illustration}
+          alt={photo?.alt || p.illustrationAlt}
           fill
           sizes="(max-width: 700px) 95vw, 48vw"
         />

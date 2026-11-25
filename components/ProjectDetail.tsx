@@ -5,6 +5,7 @@ import { type Project } from "@/content/projects";
 import { ProjectStatus } from "./ProjectCard";
 import DeviceStack from "./DeviceStack";
 import Process from "./Process";
+import { Evidence } from "./Evidence";
 import { MediaGallery } from "./MediaGallery";
 export function Breadcrumb({
   href,
@@ -61,17 +62,21 @@ export function ProjectDetail({ project: p }: { project: Project }) {
           </dd>
         </div>
       </dl>
-      <figure className="case-figure">
-        <Image
-          src={p.cover?.src || p.illustration}
-          alt={p.cover?.alt || p.illustrationAlt}
-          width={p.cover?.width || 800}
-          height={p.cover?.height || 320}
-          sizes="(max-width: 1100px) 95vw, 1100px"
-          preload
-        />
-        <figcaption>{p.cover?.caption || p.illustrationCaption}</figcaption>
-      </figure>
+      {p.cover ? (
+        <MediaGallery assets={[p.cover]} hero />
+      ) : (
+        <figure className="case-figure">
+          <Image
+            src={p.illustration}
+            alt={p.illustrationAlt}
+            width={800}
+            height={320}
+            sizes="(max-width: 1100px) 95vw, 1100px"
+            preload
+          />
+          <figcaption>{p.illustrationCaption}</figcaption>
+        </figure>
+      )}
       <div className="case-layout">
         <aside>
           <p className="kicker">In this study</p>
@@ -109,14 +114,7 @@ export function ProjectDetail({ project: p }: { project: Project }) {
           </section>
           <section id="evidence">
             <h2>{p.evidenceTitle}</h2>
-            <div className="evidence-grid">
-              {p.evidence.map((e) => (
-                <div key={e.title}>
-                  <h3>{e.title}</h3>
-                  <p>{e.text}</p>
-                </div>
-              ))}
-            </div>
+            <Evidence items={p.evidence} />
             <MediaGallery assets={p.assets} />
           </section>
           <section id="limitations">
